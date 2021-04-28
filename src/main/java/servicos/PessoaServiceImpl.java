@@ -1,31 +1,28 @@
 package servicos;
 
-import hibernate.HibernateUtil;
-
-import java.util.ArrayList;
-
-import javax.jws.WebService;
-
-import org.hibernate.SessionFactory;
-
-import repositorios.PessoaDAOImpl;
 import entidades.Pessoa;
 import entidades.RetornoSoap;
+import repositorios.PessoaFakeRepository;
+
+import javax.jws.WebService;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @WebService(endpointInterface = "servicos.PessoaService")
 public class PessoaServiceImpl implements PessoaService {
 
-	ArrayList<Pessoa> repositorioPessoas = new ArrayList<Pessoa>();
-	static HibernateUtil util = new HibernateUtil();
-	SessionFactory sessionFactory = util.getSessionFactory();
+	PessoaFakeRepository repository = new PessoaFakeRepository();
+	private static final Logger LOGGER = Logger.getLogger( PessoaServiceImpl.class.getName() );
 
 	public RetornoSoap inserirPessoa(Pessoa pessoa) {
 
 		try {
-			PessoaDAOImpl dao = new PessoaDAOImpl(util.getSessionFactory());
-			dao.salvar(pessoa);
+			repository.save(pessoa);
+			LOGGER.log(Level.INFO,"Salvou a pessoa");
 			return new RetornoSoap(0, "Sucesso");
 		} catch (Exception e) {
+			LOGGER.log(Level.WARNING,"Erro " + e.getMessage());
 			return new RetornoSoap(1, "Erro: " + e);
 		}
 	}
@@ -38,36 +35,24 @@ public class PessoaServiceImpl implements PessoaService {
 	public RetornoSoap removerPessoa(String cpf) {
 		String msg = null;
 		try {
-			for (Pessoa pessoa : repositorioPessoas) {
-				if (pessoa.getCpf().equals(cpf)) {
-					repositorioPessoas.remove(pessoa);
-					msg = pessoa.getNome() + " removido";
-				}
-			}
+			repository.delete(cpf);
+			LOGGER.log(Level.INFO,"Removeu a pessoa");
 			return new RetornoSoap(0, "Sucesso " + msg);
 		} catch (Exception e) {
+			LOGGER.log(Level.WARNING,"Erro " + e.getMessage());
 			return new RetornoSoap(1, "Erro: " + e);
 		}
 	}
 
-	public RetornoSoap recuperarPessoa(String cpf) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public RetornoSoap pesquisarPessoa(Pessoa pessoa) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public RetornoSoap recuperarTodos() {
 		try {
-			PessoaDAOImpl dao = new PessoaDAOImpl(util.getSessionFactory());
 			RetornoSoap retornoSoap = new RetornoSoap(0, "sucesso");
-			retornoSoap.setPessoas((ArrayList<Pessoa>) dao.recuperarTodos());
+			retornoSoap.setPessoas(repository.findAll());
+			LOGGER.log(Level.INFO,"Listou as pessoas");
 			return retornoSoap;
 		} catch (Exception e) {
 			RetornoSoap retornoSoap = new RetornoSoap(1, "erro " + e);
+			LOGGER.log(Level.WARNING,"Erro " + e.getMessage());
 			return retornoSoap;
 		}
 

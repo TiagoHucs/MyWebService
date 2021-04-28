@@ -19,10 +19,6 @@ public interface PessoaService {
 	@WebMethod
 	public RetornoSoap removerPessoa(String cpf);
 	@WebMethod
-	public RetornoSoap recuperarPessoa(String cpf);
-	@WebMethod
-	public RetornoSoap pesquisarPessoa(Pessoa pessoa);
-	@WebMethod
 	public RetornoSoap recuperarTodos();
 
 }
